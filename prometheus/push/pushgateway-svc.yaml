@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-pushgateway
+  namespace: prometheus
+  labels:
+    app: prometheus
+    component: pushgateway
+    release: prometheus
+spec:
+  ports:
+  - name: http
+    port: 9091
+    protocol: TCP
+    targetPort: 9091
+  selector:
+    app: prometheus
+    component: pushgateway
+    release: prometheus
+  sessionAffinity: None
+  type: ClusterIP

@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-pushgateway
+  namespace: prometheus
+  labels:
+    app: prometheus
+    component: pushgateway
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: prometheus
+      component: pushgateway
+      release: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+        component: pushgateway
+        release: prometheus
+    spec:
+      containers:
+      - image: prom/pushgateway
+        imagePullPolicy: IfNotPresent
+        name: prometheus-pushgateway
+        ports:
+        - containerPort: 9091
+          name: 9091tcp2
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /#/status
+            port: 9091
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 10
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      serviceAccount: prometheus-pushgateway
+      serviceAccountName: prometheus-pushgateway

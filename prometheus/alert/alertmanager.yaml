@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: prometheus
+    component: alertmanager
+    release: prometheus
+  name: prometheus-alertmanager
+  namespace: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: prometheus
+      component: alertmanager
+      release: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+        component: alertmanager
+        release: prometheus
+    spec:
+      containers:
+      - args:
+        - --config.file=/etc/config/alertmanager.yml
+        env:
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
+        image: prom/alertmanager
+        imagePullPolicy: IfNotPresent
+        name: prometheus-alertmanager
+        ports:
+        - containerPort: 9093
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /#/status
+            port: 9093
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 30
+        volumeMounts:
+        - mountPath: /etc/config
+          name: config-volume
+        - mountPath: /data
+          name: storage-volume
+      restartPolicy: Always
+      serviceAccount: prometheus-alertmanager
+      serviceAccountName: prometheus-alertmanager
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: prometheus-alertmanager
+        name: config-volume
+      - emptyDir: {}
+        name: storage-volume
+

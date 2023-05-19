@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-alertmanager
+  namespace: prometheus
+  labels:
+    app: prometheus
+    component: alertmanager
+    release: prometheus
+data:
+  alertmanager.yml: |
+    global: {}
+    receivers:
+    - name: default-receiver
+      webhook_configs:
+      - url: 'http://192.168.10.40:31576'
+        send_resolved: true
+    route:
+      group_interval: 5m
+      group_wait: 10s
+      receiver: default-receiver
+      repeat_interval: 3h

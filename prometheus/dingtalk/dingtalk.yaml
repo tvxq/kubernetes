@@ -1,0 +1,91 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-dingtalk-config
+  namespace: prometheus
+  labels:
+    app: prometheus
+    component: dingtalk
+    release: prometheus
+data:
+  prometheus_config.py: |
+    # coding=utf-8
+    # 需要的端口
+    PORT = 9999
+    # 机器人的关键字
+    TITLE = '告警测试test'
+    # 钉钉机器人地址
+    BOTAPI = 'https://oapi.dingtalk.com/robot/send?access_token=d9470eac687e26d7dc2f78c6fb463559890b6f1bb4addd65'
+    # 被@的手机号
+    AT_WHO = ['153804']
+    
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-dingtalk
+  namespace: prometheus
+  labels:
+    app: prometheus
+    component: dingtalk
+spec:
+  selector:
+    matchLabels:
+      app: prometheus
+      component: dingtalk
+  template:
+    metadata:
+      labels:
+        app: prometheus
+        component: dingtalk
+    spec:
+      containers:
+      - image: wd990418/prometheus:dingtalk
+        imagePullPolicy: IfNotPresent
+        name: prometheus-dingtalk
+        ports:
+        - containerPort: 9999
+          name: dingtalk-port
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: 9999
+          timeoutSeconds: 5
+        volumeMounts:
+        - mountPath: /data/prometheus_config.py
+          subPath: prometheus_config.py
+          name: prometheus-dingtalk-config
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: prometheus-dingtalk-config
+        name: prometheus-dingtalk-config        
+        
+        
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-dingtalk
+  namespace: prometheus
+  labels:
+    app: prometheus
+    component: prometheus-dingtalk
+
+spec:
+  externalTrafficPolicy: Cluster
+  ports:
+  - name: http
+    port: 9999
+    protocol: TCP
+    targetPort: 9999
+  selector:
+    app: prometheus
+    component: prometheus-dingtalk
+  type: NodePort       

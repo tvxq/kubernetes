@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: prometheus
+    component: prometheus-webhook-dingtalk
+    release: prometheus
+  name: prometheus-webhook-dingtalk
+  namespace: prometheus
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: prometheus
+      component: prometheus-webhook-dingtalk
+      release: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+        component: prometheus-webhook-dingtalk
+        release: prometheus
+    spec:
+      containers:
+      - args:
+        - --ding.profile=http=https://oapi.dingtalk.com/robot/send?access_token=d9470eac6897ecb8e9e17721c27e26d7dc2f78c6fb463559890b6f1bb4addd65
+        image: timonwong/prometheus-webhook-dingtalk:v0.3.0
+        imagePullPolicy: IfNotPresent
+        name: prometheus-webhook-dingtalk
+        ports:
+        - containerPort: 8060
+          hostPort: 8060
+          name: 8060tcp01
+          protocol: TCP
+        resources: {}
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities: {}
+          privileged: false
+          readOnlyRootFilesystem: false
+          runAsNonRoot: false
+        stdin: true
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        tty: true
+      dnsConfig: {}
+      hostNetwork: true
+      restartPolicy: Always
+

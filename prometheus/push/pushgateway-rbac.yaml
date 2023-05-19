@@ -1,0 +1,40 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus-pushgateway
+  namespace: prometheus
+  labels:
+    app: prometheus
+    component: pushgateway
+    release: prometheus
+    
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: prometheus-pushgateway
+  labels:
+    app: prometheus
+    component: pushgateway
+    release: prometheus
+rules: null
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: prometheus-pushgateway
+  labels:
+    app: prometheus
+    component: pushgateway
+    release: prometheus
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: prometheus-pushgateway
+subjects:
+- kind: ServiceAccount
+  name: prometheus-pushgateway
+  namespace: prometheus
+  

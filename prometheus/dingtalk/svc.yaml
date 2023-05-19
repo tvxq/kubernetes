@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-webhook-dingtalk
+  namespace: prometheus
+  labels:
+    app: prometheus
+    component: prometheus-webhook-dingtalk
+    release: prometheus
+spec:
+  ports:
+  - name: dingtalk
+    port: 8060
+    protocol: TCP
+    targetPort: 8060
+  selector:
+    app: prometheus
+    component: prometheus-webhook-dingtalk
+    release: prometheus
+  sessionAffinity: None
+  type: ClusterIP
